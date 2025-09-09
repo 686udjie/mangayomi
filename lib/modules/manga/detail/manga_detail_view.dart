@@ -2187,24 +2187,18 @@ class _MangaDetailViewState extends ConsumerState<MangaDetailView>
                                   ),
                                   GestureDetector(
                                     onTap: () async {
-                                      final dir = await StorageProvider()
-                                          .getGalleryDirectory();
-                                      if (context.mounted) {
-                                        final bytes = await imageProvider
-                                            .getBytes(context);
-                                        if (bytes != null && context.mounted) {
-                                          final file = File(
-                                            p.join(
-                                              dir!.path,
+                                      final bytes = await imageProvider
+                                          .getBytes(context);
+                                      if (bytes != null && context.mounted) {
+                                        await MediaSaverService.saveImage(
+                                          bytes: bytes,
+                                          fileName:
                                               "${widget.manga!.name}.png",
-                                            ),
-                                          );
-                                          file.writeAsBytesSync(bytes);
-                                          botToast(
-                                            context.l10n.cover_saved,
-                                            second: 3,
-                                          );
-                                        }
+                                        );
+                                        botToast(
+                                          context.l10n.cover_saved,
+                                          second: 3,
+                                        );
                                       }
                                     },
                                     child: const Padding(

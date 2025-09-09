@@ -11,6 +11,15 @@ import android.content.Intent
 import android.os.Build
 import android.net.Uri
 import java.io.File
+import android.os.Environment
+import android.webkit.MimeTypeMap
+import android.media.MediaScannerConnection
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.FileOutputStream
+import java.io.OutputStream
 
 class MainActivity: FlutterActivity() {
 
@@ -55,6 +64,37 @@ class MainActivity: FlutterActivity() {
                 }
             }
         }
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            "com.kodjodevf.mangayomi.media_saver",
+            StandardMethodCodec.INSTANCE,
+            flutterEngine.dartExecutor.binaryMessenger.makeBackgroundTaskQueue()
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "saveImage" -> {
+                    val data = call.argument<ByteArray>("data")
+                    val name = call.argument<String>("name") ?: "image_${System.currentTimeMillis()}.png"
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val path = withContext(Dispatchers.IO) {
+                            saveImageToPictures(data, name)
+                        }
+                        if (path != null) {
+                            MediaScannerConnection.scanFile(
+                                this@MainActivity,
+                                arrayOf(path),
+                                arrayOf(MimeTypeMap.getSingleton().getMimeTypeFromExtension(File(path).extension)),
+                                null
+                            )
+                            result.success(path)
+                        } else {
+                            result.error("ERROR", "Failed to save image", null)
+                        }
+                    }
+                }
+                else -> result.notImplemented()
+            }
+        }
     }
 
     private fun installApk(filePath: String?) {
@@ -70,5 +110,20 @@ class MainActivity: FlutterActivity() {
         }
         intent.setDataAndType(apkUri, "application/vnd.android.package-archive")
         startActivity(intent)
+    }
+
+    private fun saveImageToPictures(data: ByteArray?, name: String): String? {
+        if (data == null) return null
+        return try {
+            val picturesDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+            val targetDir = File(picturesDir, "Mangayomi")
+            if (!targetDir.exists()) targetDir.mkdirs()
+            val targetFile = File(targetDir, name)
+            val out: OutputStream = FileOutputStream(targetFile)
+            out.use { it.write(data) }
+            targetFile.absolutePath
+        } catch (e: Exception) {
+            null
+        }
     }
 }

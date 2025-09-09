@@ -62,6 +62,10 @@
 	<true/>
 	<key>UISupportsDocumentBrowser</key>
 	<true/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Allow Mangayomi to save images to Photos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Mangayomi needs access to Image permissions to save images.</string>
 	<key>FlutterDeepLinkingEnabled</key>
 	<false/>
 	<key>CFBundleURLTypes</key>

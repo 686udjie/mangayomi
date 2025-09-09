@@ -422,10 +422,10 @@ class _MangaChapterPageGalleryState
                           context.l10n.save,
                           Icons.save_outlined,
                           () async {
-                            final dir = await StorageProvider()
-                                .getGalleryDirectory();
-                            final file = File(p.join(dir!.path, "$name.png"));
-                            file.writeAsBytesSync(imageBytes);
+                            await MediaSaverService.saveImage(
+                              bytes: imageBytes,
+                              fileName: "$name.png",
+                            );
                             if (context.mounted) {
                               botToast(context.l10n.picture_saved, second: 3);
                             }

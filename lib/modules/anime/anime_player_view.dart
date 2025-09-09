@@ -2283,10 +2283,10 @@ mp.register_script_message('call_button_${button.id}_long', button${button.id}lo
                                 format: "image/png",
                                 includeLibassSubtitles: _includeSubtitles,
                               );
-                              final dir = await StorageProvider()
-                                  .getGalleryDirectory();
-                              final file = File(p.join(dir!.path, "$name.png"));
-                              file.writeAsBytesSync(imageBytes!);
+                              await MediaSaverService.saveImage(
+                                bytes: imageBytes!,
+                                fileName: "$name.png",
+                              );
                               if (context.mounted) {
                                 botToast(context.l10n.picture_saved, second: 3);
                               }
